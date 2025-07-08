@@ -49,16 +49,19 @@ class TypesenseDocument:
         return schema
 
     def create_collection(self):
-        collections = self.typesense_client.collections.retrieve()
-        exists = False
-        for collection in collections:
-            if collection["name"] == self.collection_name:
-                exists = True
-                break
-        if exists:
-            self.typesense_client.collections[self.collection_name].delete()
+        try:
+            collections = self.typesense_client.collections.retrieve()
+            exists = False
+            for collection in collections:
+                if collection["name"] == self.collection_name:
+                    exists = True
+                    break
+            if exists:
+                self.typesense_client.collections[self.collection_name].delete()
 
-        self.typesense_client.collections.create(self.collection_schema)
+            self.typesense_client.collections.create(self.collection_schema)
+        except:
+            pass
 
     def prepare_collection_document(self, obj):
         fields = self.fields
@@ -100,14 +103,17 @@ class TypesenseDocument:
     def fill_collection(self):
         queryset = self.get_queryset()
         documents = []
+        print(f"Indexing {self.Meta.model.__name__}.")
+        counter = 0
         for obj in queryset:
             try:
-                documents.append(self.prepare_collection_document(obj))
+                document = self.prepare_collection_document(obj)
+                if document is not None:
+                    self.typesense_client.collections[self.collection_name].documents.create(document)
+                    counter += 1
             except TypeError:
                 continue
-        print(f"Indexing {self.Meta.model.__name__}. Total documents: {len(documents)}...")
-        for document in documents:
-            self.typesense_client.collections[self.collection_name].documents.create(document)
+        print(f"Total documents: {counter}...")
 
     def init_collection(self):
         self.create_collection()
@@ -119,9 +125,7 @@ class TypesenseDocument:
         if index_document_id:
             index_document_id = str(index_document_id)
             index_document_update = self.prepare_collection_document(instance)
-            self.typesense_client.collections[self.collection_name].documents[index_document_id].update(
-                index_document_update
-            )
+            self.typesense_client.collections[self.collection_name].documents[index_document_id].update(index_document_update)
 
     def delete_document(self, instance):
         index_document_id = getattr(instance, self.Meta.id_field or "pk")
