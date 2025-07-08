@@ -1,5 +1,7 @@
 from typing import Optional, List
 import base64
+from PIL import Image
+from io import BytesIO
 
 
 class BaseField:
@@ -119,7 +121,13 @@ class ImageField(BaseField):
     def prepare_value(self, attr):
         try:
             file = attr.open("rb")
-            b64_image = base64.b64encode(file.read()).decode("utf-8")
+            pill_image = Image.open(file)
+            if pill_image.mode in ("RGBA", "P"):
+                pill_image = pill_image.convert("RGB")
+            output_buffer = BytesIO()
+            pill_image.save(output_buffer, format="JPEG", quality=100)
+            output_buffer.seek(0)
+            b64_image = base64.b64encode(output_buffer.getvalue()).decode("utf-8")
             return b64_image
         except Exception:
             return None
