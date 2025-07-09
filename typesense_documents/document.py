@@ -136,17 +136,37 @@ class TypesenseDocument:
             except Exception:
                 pass
 
-    def search(self, q, query_by, sort_by, query_by_weights=None, per_page=50, page=1, filter_by=None, text_match_type=None):
+    def search(
+        self,
+        q,
+        query_by,
+        sort_by=None,
+        query_by_weights=None,
+        per_page=50,
+        page=1,
+        filter_by=None,
+        text_match_type=None,
+        include_score=False,
+    ):
         search_parameters = {
             "q": q,
             "query_by": query_by,
-            "sort_by": sort_by,
+            # "sort_by": sort_by,
             # "query_by_weights": query_by_weights,
-            # "per_page": per_page,
-            # "page": page,
+            "per_page": per_page,
+            "page": page,
             # "filter_by": filter_by,
             # "text_match_type": text_match_type,
         }
+
+        if sort_by:
+            search_parameters["sort_by"] = sort_by
+        if query_by_weights:
+            search_parameters["query_by_weights"] = query_by_weights
+        if filter_by:
+            search_parameters["filter_by"] = filter_by
+        if text_match_type:
+            search_parameters["text_match_type"] = text_match_type
 
         search_response = self.typesense_client.collections[self.collection_name].documents.search(search_parameters)
         return_data = {"count": search_response.get("found"), "num_page": page}
@@ -154,8 +174,11 @@ class TypesenseDocument:
         hits = search_response.get("hits")
         for hit in hits:
             document = hit.get("document")
-            print(document)
-
+            if include_score:
+                if score := hit.get("text_match"):
+                    document["score"] = score
+                if vector_distance := hit.get("vector_distance"):
+                    document["vector_distance"] = vector_distance
             results.append(document)
         return_data["search_results"] = results
         return return_data
