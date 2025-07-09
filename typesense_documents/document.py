@@ -182,6 +182,7 @@ class TypesenseDocument:
     def search_by_image(self, vector_query, embedding_field_name):
         embedding_exist = False
         embedding_field = self.fields.get(embedding_field_name)
+        image_field_name = None
         if isinstance(embedding_field, EmbeddingField):
             image_field_name = embedding_field.from_field
             image_field = self.fields.get(image_field_name)
@@ -191,7 +192,7 @@ class TypesenseDocument:
             search_parameters = {
                 "collection": self.collection_name,
                 "q": "*",
-                "vector_query": f"{embedding_field_name}:[], image:{vector_query}",
+                "vector_query": f"{embedding_field_name}:(], {image_field_name}:{vector_query})",
             }
             search_response = self.typesense_client.multi_search.perform({"searches": [search_parameters]})
             results = []
