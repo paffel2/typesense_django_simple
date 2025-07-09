@@ -150,6 +150,15 @@ class TypesenseDocument:
         filter_by=None,
         text_match_type=None,
         include_score=False,
+        num_typos=2,
+        min_len_1typo=4,
+        min_len_2typo=7,
+        typo_tokens_threshold=1,
+        drop_tokens_threshold=1,
+        drop_tokens_mode="right_to_left",
+        enable_typos_for_numerical_tokens=True,
+        enable_typos_for_alpha_numerical_tokens=True,
+        synonym_num_typos=0,
     ):
         search_parameters = {
             "q": q,
@@ -166,6 +175,24 @@ class TypesenseDocument:
             search_parameters["filter_by"] = filter_by
         if text_match_type:
             search_parameters["text_match_type"] = text_match_type
+        if num_typos:
+            search_parameters["num_typos"] = num_typos
+        if min_len_1typo:
+            search_parameters["min_len_1typo"] = min_len_1typo
+        if min_len_2typo:
+            search_parameters["min_len_2typo"] = min_len_2typo
+        if typo_tokens_threshold:
+            search_parameters["typo_tokens_threshold"] = typo_tokens_threshold
+        if drop_tokens_threshold:
+            search_parameters["drop_tokens_threshold"] = drop_tokens_threshold
+        if drop_tokens_mode:
+            search_parameters["drop_tokens_mode"] = drop_tokens_mode
+        if enable_typos_for_numerical_tokens:
+            search_parameters["enable_typos_for_numerical_tokens"] = enable_typos_for_numerical_tokens
+        if enable_typos_for_alpha_numerical_tokens:
+            search_parameters["enable_typos_for_alpha_numerical_tokens"] = enable_typos_for_alpha_numerical_tokens
+        if synonym_num_typos:
+            search_parameters["synonym_num_typos"] = synonym_num_typos
 
         search_response = self.typesense_client.collections[self.collection_name].documents.search(search_parameters)
         return_data = {"count": search_response.get("found"), "num_page": page}
@@ -210,3 +237,19 @@ class TypesenseDocument:
             return results
         else:
             return []
+
+    def add_one_way_synonyms(self, root, name, synonyms):
+        synonym = {
+            "root": root,
+            "synonyms": synonyms,
+        }
+        self.typesense_client.collections[self.collection_name].synonyms.upsert(name, synonym)
+
+    def add_multi_way_synonyms(self, name, synonyms):
+        self.typesense_client.collections[self.collection_name].synonyms.upsert(name, synonyms)
+
+    def delete_synonyms(self, name):
+        self.typesense_client.collections[self.collection_name].synonyms[name].delete()
+
+    def get_synonyms(self, name):
+        return self.typesense_client.collections[self.collection_name].synonyms.retrieve()

@@ -8,6 +8,17 @@ class BaseField:
     field_type = None
     field_python_type = None
 
+    """
+    The base class for all typesense fields.
+
+    This class is a base class for all typesense fields. It contains the common
+    attributes and methods that are shared between all fields.
+
+    Attributes:
+        field_type (str): The field type.
+        field_python_type (type): The Python type that this field represents.
+    """
+
     def __init__(
         self,
         value: Optional[str] = None,
@@ -18,7 +29,18 @@ class BaseField:
         locale: str = "",
         stem: bool = False,
     ):
+        """
+        Initializes a typesense field.
 
+        Args:
+            value (str): The value of the field.
+            sort (bool): Whether the field should be sorted.
+            index (bool): Whether the field should be searchable.
+            optional (bool): Whether the field is optional.
+            store (bool): Whether the field should be stored.
+            locale (str): The locale for the field.
+            stem (bool): Whether the field should be stemmed.
+        """
         self.value = value
         self.sort = sort
         self.index = index
@@ -45,9 +67,19 @@ class BaseField:
             return self.field_python_type(attr)
 
 
+class Int64(BaseField):
+    field_type = "int64"
+    field_python_type = int
+
+
 class Int32(BaseField):
     field_type = "int32"
     field_python_type = int
+
+
+class Float(BaseField):
+    field_type = "float"
+    field_python_type = float
 
 
 class StringField(BaseField):
