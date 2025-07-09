@@ -179,7 +179,7 @@ class TypesenseDocument:
         return_data["search_results"] = results
         return return_data
 
-    def search_by_image(self, vector_query, embedding_field_name):
+    def search_by_image(self, vector_query, embedding_field_name, include_score=False):
         embedding_exist = False
         embedding_field = self.fields.get(embedding_field_name)
         image_field_name = None
@@ -201,6 +201,8 @@ class TypesenseDocument:
                 hits = result[0].get("hits")
                 for hit in hits:
                     document = hit.get("document")
+                    if include_score:
+                        document["vector_distance"] = hit.get("vector_distance")
                     results.append(document)
             return results
         else:
