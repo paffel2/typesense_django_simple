@@ -135,3 +135,30 @@ class TypesenseDocument:
                 self.typesense_client.collections[self.collection_name].documents[index_document_id].delete()
             except Exception:
                 pass
+
+    def search(self, q, query_by, sort_by, query_by_weights=None, per_page=50, page=1, filter_by=None, text_match_type=None):
+        search_parameters = {
+            "q": q,
+            "query_by": query_by,
+            "sort_by": sort_by,
+            # "query_by_weights": query_by_weights,
+            # "per_page": per_page,
+            # "page": page,
+            # "filter_by": filter_by,
+            # "text_match_type": text_match_type,
+        }
+
+        search_response = self.typesense_client.collections[self.collection_name].documents.search(search_parameters)
+        return_data = {"count": search_response.get("found"), "num_page": page}
+        results = []
+        hits = search_response.get("hits")
+        for hit in hits:
+            document = hit.get("document")
+            result_object = {"id": document.get("pk"), "score": hit.get("text_match"), "resource_type": "product"}
+            print(f"{document.get('pk')} {document.get('sku')} {result_object.get('score')}")
+            results.append(result_object)
+        return_data["search_results"] = results
+        return return_data
+
+    def multi_search(self, q, params):
+        pass
