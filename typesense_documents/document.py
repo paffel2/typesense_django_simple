@@ -203,4 +203,4 @@ class TypesenseDocument:
                     results.append(document)
             return results
         else:
-            []
+            return []
