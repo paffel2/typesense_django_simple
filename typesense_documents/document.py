@@ -1,6 +1,6 @@
 import typesense
 from django.conf import settings
-from typesense_documents.fields import BaseField, EmbeddingField
+from typesense_documents.fields import BaseField, EmbeddingField, ImageField
 
 
 class TypesenseDocument:
@@ -151,12 +151,8 @@ class TypesenseDocument:
         search_parameters = {
             "q": q,
             "query_by": query_by,
-            # "sort_by": sort_by,
-            # "query_by_weights": query_by_weights,
             "per_page": per_page,
             "page": page,
-            # "filter_by": filter_by,
-            # "text_match_type": text_match_type,
         }
 
         if sort_by:
@@ -183,5 +179,28 @@ class TypesenseDocument:
         return_data["search_results"] = results
         return return_data
 
-    def multi_search(self, q, params):
-        pass
+    def search_by_image(self, vector_query, embedding_field_name):
+        embedding_exist = False
+        embedding_field = self.fields.get("embedding_field_name")
+        if isinstance(embedding_field, EmbeddingField):
+            image_field_name = embedding_field.from_field
+            image_field = self.fields.get(image_field_name)
+            if image_field and isinstance(image_field, ImageField):
+                embedding_exist = True
+        if embedding_exist:
+            search_parameters = {
+                "collection": self.collection_name,
+                "q": "*",
+                "vector_query": f"{embedding_field_name}:[], image:{vector_query}",
+            }
+            search_response = self.typesense_client.multi_search.perform({"searches": [search_parameters]})
+            results = []
+            result = search_response.get("results")
+            if result:
+                hits = result[0].get("hits")
+                for hit in hits:
+                    document = hit.get("document")
+                    results.append(document)
+            return results
+        else:
+            []
