@@ -154,9 +154,9 @@ class TypesenseDocument:
         hits = search_response.get("hits")
         for hit in hits:
             document = hit.get("document")
-            result_object = {"id": document.get("pk"), "score": hit.get("text_match"), "resource_type": "product"}
-            print(f"{document.get('pk')} {document.get('sku')} {result_object.get('score')}")
-            results.append(result_object)
+            print(document)
+
+            results.append(document)
         return_data["search_results"] = results
         return return_data
 
