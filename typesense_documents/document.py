@@ -125,7 +125,10 @@ class TypesenseDocument:
         if index_document_id:
             index_document_id = str(index_document_id)
             index_document_update = self.prepare_collection_document(instance)
-            self.typesense_client.collections[self.collection_name].documents[index_document_id].update(index_document_update)
+            try:
+                self.typesense_client.collections[self.collection_name].documents[index_document_id].update(index_document_update)
+            except typesense.exceptions.ObjectNotFound:
+                self.typesense_client.collections[self.collection_name].documents.create(index_document_update)
 
     def delete_document(self, instance):
         index_document_id = getattr(instance, self.Meta.id_field or "pk")
