@@ -181,7 +181,7 @@ class TypesenseDocument:
 
     def search_by_image(self, vector_query, embedding_field_name):
         embedding_exist = False
-        embedding_field = self.fields.get("embedding_field_name")
+        embedding_field = self.fields.get(embedding_field_name)
         if isinstance(embedding_field, EmbeddingField):
             image_field_name = embedding_field.from_field
             image_field = self.fields.get(image_field_name)
