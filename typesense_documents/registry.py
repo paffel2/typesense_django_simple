@@ -6,6 +6,7 @@ class CollectionRegistry:
     def register_model(self, document):
         self.index.add(document)
         self.models.add(document.Meta.model)
+        return document
 
     def update(self, instance):
         if instance.__class__ in self.models:
