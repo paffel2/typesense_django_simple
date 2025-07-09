@@ -192,7 +192,7 @@ class TypesenseDocument:
             search_parameters = {
                 "collection": self.collection_name,
                 "q": "*",
-                "vector_query": f"{embedding_field_name}:(], {image_field_name}:{vector_query})",
+                "vector_query": f"{embedding_field_name}:([], {image_field_name}:{vector_query})",
             }
             search_response = self.typesense_client.multi_search.perform({"searches": [search_parameters]})
             results = []
