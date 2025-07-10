@@ -23,9 +23,10 @@ class CollectionRegistry:
         if instance.__class__ in self.related_models:
             for document in self.related_models[instance.__class__]:
                 if document in self.index:
-                    related_for_update = document.get_instances_from_related(instance)
+                    document_instance = document()
+                    related_for_update = document_instance.get_instances_from_related(instance)
                     for related_instance in related_for_update:
-                        document().update_document(related_instance)
+                        document_instance.update_document(related_instance)
 
     def delete(self, instance):
         if instance.__class__ in self.models:
