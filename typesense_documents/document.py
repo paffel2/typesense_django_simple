@@ -253,3 +253,6 @@ class TypesenseDocument:
 
     def get_synonyms(self, name):
         return self.typesense_client.collections[self.collection_name].synonyms.retrieve()
+
+    def get_instances_from_related(self, related_instance):
+        raise NotImplementedError
