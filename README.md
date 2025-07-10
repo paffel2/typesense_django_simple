@@ -8,6 +8,9 @@ A simple Typesense integration for Django. Works like Django Elasticsearch DSL.
 ### Creating documents
 
 ```python
+
+# typesense_models.py
+
 from typesense_documents.document import TypesenseDocument
 from typesense_documents import fields
 froom typesense_documents.registry import typesense_registry
