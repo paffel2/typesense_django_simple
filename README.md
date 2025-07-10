@@ -32,6 +32,15 @@ INSTALLED_APPS = [
     ...
 ]
 ```
+### Add typesense configuration to settings.py
+
+```python
+# settings.py
+
+TYPESENSE_HOST = "localhost"
+TYPESENSE_PORT = 8108
+TYPESENSE_PROTOCOL = "http"
+TYPESENSE_API_KEY = "typesense_api_key"
 
 ### Use command for creating typesense collections
 
