@@ -24,7 +24,7 @@ class SignalProcessor:
 
 class CelerySignalProcessor(SignalProcessor):
     def handle_save(self, sender, instance, **kwargs):
-        instance_pk = typesense_registry.get_model_pk(instance)
+        instance_pk = typesense_registry.get_model_pk(instance) or instance.pk
         self.save_task.apply_async((instance_pk,instance.__class__.__name__),countdown=5)
 
     def handle_delete(self, sender, instance, **kwargs):
@@ -41,9 +41,18 @@ class CelerySignalProcessor(SignalProcessor):
         for model in typesense_registry.models:
             if model.__name__ == model_name:
                 instance = model.objects.get(pk=pk)
-        if instance: 
-            typesense_registry.update(instance)
+                typesense_registry.update(instance)
+        for model in typesense_registry.related_models:
+            if model.__name__ == model_name:
+                for document in typesense_registry.related_models[model]:
+                    document_instance = document()
+                    instance = model.objects.get(pk=pk)
+                    related_for_update = document_instance.get_instances_from_related(instance)
+                    for related_instance in related_for_update:
+                        document_instance.update_document(related_instance)
 
     @shared_task()
     def delete_task(pk,model_name):
         typesense_registry.delete(pk,model_name)
+
+    
