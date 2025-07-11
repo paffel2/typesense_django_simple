@@ -132,7 +132,7 @@ class TypesenseDocument:
 
     def delete_document(self, index_document_id):
             try:
-                self.typesense_client.collections[self.collection_name].documents[index_document_id].delete()
+                self.typesense_client.collections[self.collection_name].documents[str(index_document_id)].delete()
             except Exception:
                 pass
 

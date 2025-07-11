@@ -32,7 +32,7 @@ class CollectionRegistry:
         for model in typesense_registry.models:
             if model.__name__ == model_name:
                 for index_class in self.index:
-                    if index_class.Meta.model == model.__class__:
+                    if index_class.Meta.model == model:
                         index_class().delete_document(instance_pk)
 
     def get_model_pk(self,instance):
