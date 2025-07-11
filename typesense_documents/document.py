@@ -130,10 +130,7 @@ class TypesenseDocument:
             except typesense.exceptions.ObjectNotFound:
                 self.typesense_client.collections[self.collection_name].documents.create(index_document_update)
 
-    def delete_document(self, instance):
-        index_document_id = getattr(instance, self.Meta.id_field or "pk")
-        if index_document_id:
-            index_document_id = str(index_document_id)
+    def delete_document(self, index_document_id):
             try:
                 self.typesense_client.collections[self.collection_name].documents[index_document_id].delete()
             except Exception:

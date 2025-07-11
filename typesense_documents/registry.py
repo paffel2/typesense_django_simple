@@ -28,11 +28,17 @@ class CollectionRegistry:
                     for related_instance in related_for_update:
                         document_instance.update_document(related_instance)
 
-    def delete(self, instance):
+    def delete(self,instance_pk, model_name):
+        for model in typesense_registry.models:
+            if model.__name__ == model_name:
+                for index_class in self.index:
+                    if index_class.Meta.model == model.__class__:
+                        index_class().delete_document(instance_pk)
+
+    def get_model_pk(self,instance):
         if instance.__class__ in self.models:
             for index_class in self.index:
                 if index_class.Meta.model == instance.__class__:
-                    index_class().delete_document(instance)
-
+                    return getattr(instance, index_class.Meta.id_field or "pk")
 
 typesense_registry = CollectionRegistry()
