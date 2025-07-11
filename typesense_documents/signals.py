@@ -25,7 +25,7 @@ class SignalProcessor:
 class CelerySignalProcessor(SignalProcessor):
     def handle_save(self, sender, instance, **kwargs):
         instance_pk = typesense_registry.get_model_pk(instance)
-        self.save_task.delay(instance_pk,instance.__class__.__name__)
+        self.save_task.apply_async((instance_pk,instance.__class__.__name__),countdown=5)
 
     def handle_delete(self, sender, instance, **kwargs):
         instance_pk = typesense_registry.get_model_pk(instance)
