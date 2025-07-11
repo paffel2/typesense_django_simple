@@ -14,7 +14,7 @@ class SignalProcessor:
 
     def handle_delete(self, sender, instance, **kwargs):
         instance_pk = typesense_registry.get_model_pk(instance)
-        typesense_registry.delete(instance_pk)
+        typesense_registry.delete(instance_pk, instance.__class__.__name__)
 
     def handle_m2m_changed(self, sender, instance, action, **kwargs):
         if action in ("post_add", "post_remove", "post_clear"):
