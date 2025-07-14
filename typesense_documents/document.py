@@ -156,6 +156,7 @@ class TypesenseDocument:
         enable_typos_for_numerical_tokens=True,
         enable_typos_for_alpha_numerical_tokens=True,
         synonym_num_typos=0,
+        exclude_fields=None
     ):
         search_parameters = {
             "q": q,
@@ -190,6 +191,8 @@ class TypesenseDocument:
             search_parameters["enable_typos_for_alpha_numerical_tokens"] = enable_typos_for_alpha_numerical_tokens
         if synonym_num_typos:
             search_parameters["synonym_num_typos"] = synonym_num_typos
+        if exclude_fields:
+            search_parameters["exclude_fields"] = exclude_fields
 
         search_response = self.typesense_client.collections[self.collection_name].documents.search(search_parameters)
         return_data = {"count": search_response.get("found"), "num_page": page}
