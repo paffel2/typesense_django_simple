@@ -205,6 +205,27 @@ class TypesenseDocument:
             results.append(document)
         return_data["search_results"] = results
         return return_data
+    
+    def semantic_search(self,query,query_by,embedding_field_name,page=1,perpage=50,include_score=False):
+        search_parameters = {
+            "collection": self.collection_name,
+            "q": "query",
+            "query_by":f"{query_by},{embedding_field_name}",
+            "exclude_fields": embedding_field_name,
+            "page": page,
+            "per_page": perpage
+        }
+        search_response = self.typesense_client.multi_search.perform({"searches": [search_parameters]})
+        results = []
+        result = search_response.get("results")
+        if result:
+            hits = result[0].get("hits")
+            for hit in hits:
+                document = hit.get("document")
+                if include_score:
+                    document["vector_distance"] = hit.get("vector_distance")
+                results.append(document)
+        return results
 
     def search_by_image(self, vector_query, embedding_field_name, include_score=False):
         embedding_exist = False
