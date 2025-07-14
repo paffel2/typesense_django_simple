@@ -7,12 +7,13 @@ class CollectionRegistry:
     def register_model(self, document):
         self.index.add(document)
         self.models.add(document.Meta.model)
-        if document.Meta.related_models:
+        if getattr(document.Meta, "related_models", None):
             for related_model in document.Meta.related_models:
                 if related_model not in self.related_models:
                     self.related_models[related_model] = set([document])
                 else:
                     self.related_models[related_model].add(document)
+        return document
 
     def update(self, instance):
         if instance.__class__ in self.models:
