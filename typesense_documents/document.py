@@ -209,7 +209,7 @@ class TypesenseDocument:
     def semantic_search(self,query,query_by,embedding_field_name,page=1,perpage=50,include_score=False):
         search_parameters = {
             "collection": self.collection_name,
-            "q": "query",
+            "q": query,
             "query_by":f"{query_by},{embedding_field_name}",
             "exclude_fields": embedding_field_name,
             "page": page,
