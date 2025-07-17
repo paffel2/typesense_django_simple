@@ -82,6 +82,23 @@ class Float(BaseField):
     field_python_type = float
 
 
+class FloatArray(BaseField):
+    field_type = "float[]"
+    field_python_type = list
+
+    def prepare_value(self, attr):
+        if isinstance(attr, self.field_python_type):
+            for value in attr:
+                if not isinstance(value, self.field_python_type):
+                    value = self.field_python_type(value)
+            return attr
+        else:
+            new_list = self.field_python_type(attr)
+            for value in new_list:
+                value = float(value)
+            return new_list
+
+
 class StringField(BaseField):
     field_type = "string"
     field_python_type = str
