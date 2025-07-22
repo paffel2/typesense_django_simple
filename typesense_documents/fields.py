@@ -215,6 +215,6 @@ class SentenceTransformerEmbeddingField(BaseField):
         if for_embeddings:
             embeddings = []
             embeddings_np = model.encode(sentence=for_embeddings,task="text-matching")
-            embeddings = embeddings_np.tolist()[0]
+            embeddings = embeddings_np.tolist()
             return embeddings
         

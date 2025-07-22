@@ -76,6 +76,7 @@ class TypesenseDocument:
                 embeddings.append(field_type)
                 continue
             if isinstance(field_type, SentenceTransformerEmbeddingField):
+                field_type.field_name = name
                 sentence_transformers_fields.append(field_type)
                 continue
             else:
