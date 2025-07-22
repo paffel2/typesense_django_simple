@@ -1,6 +1,8 @@
 import typesense
 from django.conf import settings
 from typesense_documents.fields import BaseField, EmbeddingField, ImageField
+from tqdm import tqdm
+ 
 
 
 class TypesenseDocument:
@@ -105,7 +107,7 @@ class TypesenseDocument:
         documents = []
         print(f"Indexing {self.Meta.model.__name__}.")
         counter = 0
-        for obj in queryset:
+        for obj in tqdm(queryset):
             try:
                 document = self.prepare_collection_document(obj)
                 if document is not None:
