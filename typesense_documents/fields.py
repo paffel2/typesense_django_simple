@@ -194,16 +194,22 @@ class ImageField(BaseField):
 class SentenceTransformerEmbeddingField(BaseField):
     field_type = "float[]"
     field_python_type = list
-    def __init__(self,index=True, optional=False, store=True, model_name="", from_field=None,num_dims=None):
+    def __init__(self,index=True, optional=False, store=True, model_name="", from_field=None,num_dims=None,task="text-matching",extract_function=lambda x:x.tolist()):
         self.index = index
         self.optional = optional
         self.store = store
         self.model_name = model_name
         self.from_field = from_field
         self.num_dims = num_dims
+        self.task = task
+        self.extract_function = extract_function
 
     def get_field_schema(self):
-        return super().get_field_schema()
+        return {
+            "type": self.field_type,
+            "store": self.store,
+            "index": self.index,
+        }
     
     
     def prepare_value(self, attr, model):
@@ -214,7 +220,6 @@ class SentenceTransformerEmbeddingField(BaseField):
             for_embeddings  = str(attr) 
         if for_embeddings:
             embeddings = []
-            embeddings_np = model.encode(sentence=for_embeddings,task="text-matching")
-            embeddings = embeddings_np.tolist()
+            embeddings_np = model.encode(sentences=for_embeddings,task=self.task)
+            embeddings = extract_function(embeddings_np)
             return embeddings
-        
