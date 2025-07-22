@@ -189,3 +189,32 @@ class ImageField(BaseField):
             return b64_image
         except Exception:
             return None
+
+
+class SentenceTransformerEmbeddingField(BaseField):
+    field_type = "float[]"
+    field_python_type = list
+    def __init__(self,index=True, optional=False, store=True, model_name="", from_field=None,num_dims=None):
+        self.index = index
+        self.optional = optional
+        self.store = store
+        self.model_name = model_name
+        self.from_field = from_field
+        self.num_dims = num_dims
+
+    def get_field_schema(self):
+        return super().get_field_schema()
+    
+    
+    def prepare_value(self, attr, model):
+        for_embeddings = None
+        if isinstance(attr, str) or (self.optional and attr is None):
+            for_embeddings = attr
+        else:
+            for_embeddings  = str(attr) 
+        if for_embeddings:
+            embeddings = []
+            embeddings_np = model.encode(sentence=for_embeddings,task="text-matching")
+            embeddings = embeddings_np.tolist()[0]
+            return embeddings
+        

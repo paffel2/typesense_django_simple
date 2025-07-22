@@ -1,7 +1,8 @@
 import typesense
 from django.conf import settings
-from typesense_documents.fields import BaseField, EmbeddingField, ImageField
+from typesense_documents.fields import BaseField, EmbeddingField, ImageField, SentenceTransformerEmbeddingField
 from tqdm import tqdm
+from sentence_transformer import SentenceTransformer
  
 
 
@@ -10,6 +11,7 @@ class TypesenseDocument:
     default_sorting_fields = None
 
     fields = []
+    sentence_transformer_model = None
 
     def parse_attributes(self):
         self.fields = {}
@@ -69,22 +71,35 @@ class TypesenseDocument:
         fields = self.fields
         document = {}
         embeddings = []
+        sentence_transformers_fields = []
         for name, field_type in fields.items():
             if isinstance(field_type, EmbeddingField):
                 embeddings.append(field_type)
                 continue
-            value = field_type.value
-            if value is None:
-                value = name
-            attr = getattr(obj, value)
-            if callable(attr):
-                attr = attr()
-            document[name] = field_type.prepare_value(attr)
+            if isinstance(field_type, SentenceTransformerEmbeddingField):
+                sentence_transformers_fields.append(field_type)
+                continue
+            else:
+                value = field_type.value
+                if value is None:
+                    value = name
+                attr = getattr(obj, value)
+                if callable(attr):
+                    attr = attr()
+                document[name] = field_type.prepare_value(attr)
         for embedding in embeddings:
             embed_field = embedding.from_field
             embed_value = document.get(embed_field)
             if embed_value is None:
                 raise TypeError
+        for sentence_transformer_field in sentence_transformers_fields:
+            embed_field = sentence_transformer_field.from_field
+            embed_value = document.get(embed_field)
+            if embed_value is None:
+                raise TypeError
+            else:
+                embeddings_for_document = sentence_transformer_field.prepare_value(embed_value, self.sentence_transformer_model)
+                document[sentence_transformer_field.field_name] = embeddings_for_document
         id_field = self.Meta.id_field or "pk"
         id_attr = getattr(obj, id_field)
 
