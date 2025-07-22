@@ -221,5 +221,5 @@ class SentenceTransformerEmbeddingField(BaseField):
         if for_embeddings:
             embeddings = []
             embeddings_np = model.encode(sentences=for_embeddings,task=self.task)
-            embeddings = extract_function(embeddings_np)
+            embeddings = self.extract_function(embeddings_np)
             return embeddings
