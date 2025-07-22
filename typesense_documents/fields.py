@@ -129,16 +129,19 @@ class BooleanField(BaseField):
 
 
 class EmbeddingField(BaseField):
-    def __init__(self, index=True, optional=False, store=True, model_name="", from_field=None):
+    def __init__(self, index=True, optional=False, store=True, model_name="", from_field=None,api_key=None,url=None,num_dims=None):
 
         self.index = index
         self.optional = optional
         self.store = store
         self.model_name = model_name
         self.from_field = from_field
+        self.api_key = api_key
+        self.url = url
+        self.num_dims = num_dims
 
     def get_field_schema(self):
-        return {
+        schema = {
             "type": "float[]",
             "embed": {
                 "from": [self.from_field],
@@ -147,6 +150,12 @@ class EmbeddingField(BaseField):
                 },
             },
         }
+        if self.api_key and self.url:
+            schema["embed"]["model_config"]["api_key"] = self.api_key
+            schema["embed"]["model_config"]["url"] = self.url
+        if self.num_dims:
+            schema["embed"]["num_dims"] = self.num_dims
+        return schema
 
 
 class ImageField(BaseField):

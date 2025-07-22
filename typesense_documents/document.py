@@ -111,7 +111,7 @@ class TypesenseDocument:
                 if document is not None:
                     self.typesense_client.collections[self.collection_name].documents.create(document)
                     counter += 1
-            except TypeError:
+            except Exception:
                 continue
         print(f"Total documents: {counter}...")
 
