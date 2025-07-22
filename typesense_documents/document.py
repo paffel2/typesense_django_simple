@@ -2,7 +2,6 @@ import typesense
 from django.conf import settings
 from typesense_documents.fields import BaseField, EmbeddingField, ImageField, SentenceTransformerEmbeddingField
 from tqdm import tqdm
-from sentence_transformer import SentenceTransformer
  
 
 
