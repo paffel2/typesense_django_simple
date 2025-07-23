@@ -275,6 +275,31 @@ class TypesenseDocument:
             return results
         else:
             return []
+        
+    def vector_search(self,query,sentence_transformer_field,page=1,perpage=50,include_score=False):
+        for field_name,field in self.fields.items():
+            if field_name == sentence_transformer_field:
+                embeddings = field.prepare_value(query,self.sentence_transformer_model)
+                search_parameters = {
+                    "collection": self.collection_name,
+                    "q": "*",
+                    "query_by":f"{sentence_transformer_field}:({embeddings})",
+                    "exclude_fields": sentence_transformer_field,
+                    "page": page,
+                    "per_page": perpage
+                }
+                search_response = self.typesense_client.multi_search.perform({"searches": [search_parameters]})
+                results = []        
+                result = search_response.get("results")
+                if result:
+                    hits = result[0].get("hits")
+                    for hit in hits:
+                        document = hit.get("document")
+                        if include_score:
+                            document["vector_distance"] = hit.get("vector_distance")
+                        results.append(document)
+                break
+        return results
 
     def add_one_way_synonyms(self, root, name, synonyms):
         synonym = {

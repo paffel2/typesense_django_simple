@@ -50,6 +50,16 @@ class BaseField:
         self.store = store
 
     def get_field_schema(self):
+        """
+        Returns the schema for the field.
+
+        The schema is a dictionary that contains metadata about the field
+        including its type, locale, sortability, stemming, storage, indexability,
+        and optionality.
+
+        Returns:
+            dict: A dictionary representing the field schema.
+        """
         return {
             "type": self.field_type,
             "locale": self.locale,
@@ -61,6 +71,15 @@ class BaseField:
         }
 
     def prepare_value(self, attr):
+        """
+        Prepares the value of a field for typesense.
+
+        Args:
+            attr (Any): The value of the field.
+
+        Returns:
+            Any: The prepared value of the field.
+        """
         if isinstance(attr, self.field_python_type) or (self.optional and attr is None):
             return attr
         else:
