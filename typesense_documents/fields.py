@@ -213,21 +213,27 @@ class ImageField(BaseField):
 class SentenceTransformerEmbeddingField(BaseField):
     field_type = "float[]"
     field_python_type = list
-    def __init__(self,index=True, optional=False, store=True, model_name="", from_field=None,num_dims=None,task="text-matching",extract_function=lambda x:x.tolist()):
+    def __init__(self,index=True, from_field=None,num_dim=1024,task="text-matching",m=16,ef_construction=200,extract_function=lambda x:x.tolist(),vec_dist="cosine"):
         self.index = index
-        self.optional = optional
-        self.store = store
-        self.model_name = model_name
         self.from_field = from_field
-        self.num_dims = num_dims
+        self.num_dim = num_dim
         self.task = task
         self.extract_function = extract_function
+        self.m = m
+        self.ef_construction = ef_construction
+        self.vec_dist = vec_dist
 
     def get_field_schema(self):
         return {
             "type": self.field_type,
             "store": self.store,
             "index": self.index,
+            "num_dim": self.num_dim,
+            "vec_dist": self.vec_dist,
+            "hnsw_params": {
+                "M": self.m,
+                "ef_construction": self.ef_construction
+        }
         }
     
     
