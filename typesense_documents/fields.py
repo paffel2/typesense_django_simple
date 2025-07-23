@@ -226,7 +226,6 @@ class SentenceTransformerEmbeddingField(BaseField):
     def get_field_schema(self):
         return {
             "type": self.field_type,
-            "store": self.store,
             "index": self.index,
             "num_dim": self.num_dim,
             "vec_dist": self.vec_dist,

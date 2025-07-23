@@ -283,7 +283,7 @@ class TypesenseDocument:
                 search_parameters = {
                     "collection": self.collection_name,
                     "q": "*",
-                    "query_by":f"{sentence_transformer_field}:({embeddings})",
+                    "vector_query":f"{sentence_transformer_field}:({embeddings})",
                     "exclude_fields": sentence_transformer_field,
                     "page": page,
                     "per_page": perpage
