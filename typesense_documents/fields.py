@@ -237,13 +237,8 @@ class SentenceTransformerEmbeddingField(BaseField):
     
     
     def prepare_value(self, attr, model):
-        for_embeddings = None
-        if isinstance(attr, str) or (self.optional and attr is None):
-            for_embeddings = attr
-        else:
-            for_embeddings  = str(attr) 
-        if for_embeddings:
+        if attr:
             embeddings = []
-            embeddings_np = model.encode(sentences=for_embeddings,task=self.task)
+            embeddings_np = model.encode(sentences=attr,task=self.task)
             embeddings = self.extract_function(embeddings_np)
             return embeddings

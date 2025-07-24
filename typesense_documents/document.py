@@ -132,9 +132,33 @@ class TypesenseDocument:
                 continue
         print(f"Total documents: {counter}...")
 
-    def init_collection(self):
+    def fill_collection_using_batches(self):
+        queryset = self.get_queryset()
+        print(f"Indexing {self.Meta.model.__name__}.")
+        counter = 0
+        objects = []
+        for obj in tqdm(queryset):
+                try:
+                    objects.append(obj)
+                    counter += 1
+                    if counter % 100 == 0:
+                        documents = self.prepare_batch_documents(objects)
+                        result = self.typesense_client.collections[self.collection_name].documents.import_(documents, {'action': 'create'})
+                        objects = []
+                except Exception as e:
+                    print(e)
+                    continue
+        if objects:
+             documents = self.prepare_batch_documents(objects)
+             self.typesense_client.collections[self.collection_name].documents.import_(documents, {'action': 'create'})
+        print(f"Total documents: {counter}...")
+
+    def init_collection(self, use_batch=False):
         self.create_collection()
-        self.fill_collection()
+        if use_batch:
+            self.fill_collection_using_batches()
+        else:
+            self.fill_collection()
         print(f"Collection {self.collection_name} created")
 
     def update_document(self, instance):
@@ -360,17 +384,15 @@ class TypesenseDocument:
                         else:
                             embed_values_lists[sentence_transformer_field.field_name] = [embed_value]
 
-                id_field = self.Meta.id_field or "pk"
-                id_attr = getattr(instance, id_field)
-                document["id"] = str(id_attr)
-                documents_list.append(document)
-        
+            id_field = self.Meta.id_field or "pk"
+            id_attr = getattr(instance, id_field)
+            document["id"] = str(id_attr)
+            documents_list.append(document)
         for name, field_type in fields.items():
-           if instance(field_type,SentenceTransformerEmbeddingField):
+           if isinstance(field_type,SentenceTransformerEmbeddingField):
                for_embed = embed_values_lists.get(name)
                if for_embed:
                     embeddings =sentence_transformer_field.prepare_value(for_embed, self.sentence_transformer_model)
                     for (document,embedding) in zip(documents_list,embeddings):
                         document[name] = embedding
-           
         return documents_list
