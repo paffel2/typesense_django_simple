@@ -319,3 +319,58 @@ class TypesenseDocument:
 
     def get_instances_from_related(self, related_instance):
         raise NotImplementedError
+
+
+    def prepare_batch_documents(self, instances):
+        embed_values_lists = {}
+        documents_list = []
+        fields = self.fields
+        for instance in instances:
+            embeddings = []
+            sentence_transformers_fields = []
+            document = {}
+            for name, field_type in fields.items():
+                if isinstance(field_type, EmbeddingField):
+                    embeddings.append(field_type)
+                    continue
+                if isinstance(field_type, SentenceTransformerEmbeddingField):
+                    field_type.field_name = name
+                    sentence_transformers_fields.append(field_type)
+                else:
+                    value = field_type.value
+                    if value is None:
+                        value = name
+                    attr = getattr(instance, value)
+                    if callable(attr):
+                        attr = attr()
+                    document[name] = field_type.prepare_value(attr)
+                for embedding in embeddings:
+                    embed_field = embedding.from_field
+                    embed_value = document.get(embed_field)
+                    if embed_value is None:
+                        raise TypeError
+                for sentence_transformer_field in sentence_transformers_fields:
+                    embed_field = sentence_transformer_field.from_field
+                    embed_value = document.get(embed_field)
+                    if embed_value is None:
+                        raise TypeError
+                    else:
+                        if embed_values_lists.get(sentence_transformer_field.field_name):
+                            embed_values_lists[sentence_transformer_field.field_name].append(embed_value)
+                        else:
+                            embed_values_lists[sentence_transformer_field.field_name] = [embed_value]
+
+                id_field = self.Meta.id_field or "pk"
+                id_attr = getattr(instance, id_field)
+                document["id"] = str(id_attr)
+                documents_list.append(document)
+        
+        for name, field_type in fields.items():
+           if instance(field_type,SentenceTransformerEmbeddingField):
+               for_embed = embed_values_lists.get(name)
+               if for_embed:
+                    embeddings =sentence_transformer_field.prepare_value(for_embed, self.sentence_transformer_model)
+                    for (document,embedding) in zip(documents_list,embeddings):
+                        document[name] = embedding
+           
+        return documents_list
