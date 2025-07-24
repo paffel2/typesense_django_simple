@@ -10,7 +10,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         use_batch = False
-        if options["use_batch"]:
+        if options["use-batch"]:
             use_batch = True
         for document in typesense_registry.index:
             document().init_collection(use_batch=use_batch)

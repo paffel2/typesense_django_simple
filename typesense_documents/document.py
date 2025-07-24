@@ -300,14 +300,14 @@ class TypesenseDocument:
         else:
             return []
         
-    def vector_search(self,query,sentence_transformer_field,page=1,perpage=50,include_score=False):
+    def vector_search(self,query,sentence_transformer_field,page=1,perpage=50,include_score=False,k=100):
         for field_name,field in self.fields.items():
             if field_name == sentence_transformer_field:
                 embeddings = field.prepare_value(query,self.sentence_transformer_model)
                 search_parameters = {
                     "collection": self.collection_name,
                     "q": "*",
-                    "vector_query":f"{sentence_transformer_field}:({embeddings})",
+                    "vector_query":f"{sentence_transformer_field}:({embeddings},k:{k})",
                     "exclude_fields": sentence_transformer_field,
                     "page": page,
                     "per_page": perpage
